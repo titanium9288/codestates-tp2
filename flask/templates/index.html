@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+
+<head>
+    <meta charset="UTF-8">
+    <title>깡통전세 단속반</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --main-color: #ff7f00;
+            --secondary-color: #ffbb33;
+            --alert-color: #D32F2F;
+        }
+
+        body {
+            background-color: #f8f9fa;
+        }
+
+        main {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        a:link,
+        a:visited,
+        a:hover,
+        a:active {
+            color: #000000;
+            text-decoration: none;
+        }
+
+        nav {
+            background-color: #ffffff;
+        }
+
+        #logo {
+            font-family: 'Black Han Sans', sans-serif;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            font-family: 'IBM Plex Sans KR', sans-serif;
+        }
+
+        .banner {
+            width: 100%;
+            height: 180px;
+            background-image: url('static/image/banner.png');
+            background-size: cover;
+            border-radius: 5px;
+        }
+
+        .gradient-box {
+            width: 130px;
+            height: 110px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            margin: 15px;
+            box-shadow: 0 8px 16px rgba(255, 127, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .gradient-box:hover {
+            box-shadow: 0 12px 24px rgba(255, 127, 0, 0.3);
+            transform: scale(1.05);
+        }
+
+        .gradient-box.active {
+            box-shadow: 0 12px 24px rgba(255, 127, 0, 0.45);
+            transform: scale(1.1);
+        }
+
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .flex-title {
+            flex: 0 0 100%;
+        }
+
+        .flex-item {
+            flex: 0 0 calc(20% - 30px);
+            opacity: 1;
+            visibility: visible;
+            padding: 16px;
+            margin: 15px;
+            transition: transform 0.3s ease, opacity 0s, visibility 0s, padding 0.5s, margin 0.5s;
+        }
+
+        .flex-item-expand {
+            flex: 0 0 calc(100% - 30px);
+            padding: 16px;
+            margin: 15px;
+        }
+
+        .flex-item-hidden {
+            opacity: 0;
+            visibility: hidden;
+            height: 0;
+            width: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        .text-main {
+            color: var(--main-color);
+        }
+
+        .small-text {
+            font-size: 0.7rem;
+        }
+
+        .dotted {
+            text-emphasis: filled dot var(--main-color);
+        }
+
+        .table-fade {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .table-fade.show {
+            opacity: 1;
+        }
+
+        .table {
+            border-collapse: separate;
+            border-spacing: 0 15px;
+            width: 100%;
+        }
+
+        .table thead tr {
+            background-color: var(--main-color);
+            color: #fff;
+            text-align: center;
+        }
+
+        .table tbody tr {
+            background-color: #ffffff;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .table tbody tr:hover {
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+            transform: scale(1.01);
+        }
+
+        .table td,
+        .table th {
+            padding: 1.1em;
+            text-align: center;
+        }
+
+        .footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 0.8em 0;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .modal-body {
+            padding: 20px;
+            font-family: 'IBM Plex Sans KR', sans-serif;
+        }
+
+        .modal-title {
+            font-weight: bold;
+            font-size: 1.4em;
+        }
+
+        .info-title {
+            font-weight: bold;
+            display: inline-block;
+            width: 48%;
+            margin-right: 2%;
+        }
+
+        .info-content {
+            display: inline-block;
+            width: 48%;
+            margin-right: 2%;
+        }
+
+        .note {
+            font-size: 0.8em;
+            margin-top: 10px;
+            display: block;
+            width: 100%;
+            color: #999;
+        }
+
+        .top-info,
+        .middle-info,
+        .other-info {
+            margin-bottom: 20px;
+        }
+    </style>
+    <script>
+        let chart;
+
+        // 숫자를 천 단위로 콤마(,)로 구분하는 함수
+        var numberWithCommas = function (x) {
+            return x.toLocaleString();
+        };
+
+        // 만과 억 단위로 숫자를 나누는 함수
+        function formatPrice(num) {
+            if (num >= 10000) {
+                const ok = Math.floor(num / 10000);
+                const man = num % 10000;
+                return `${ok}억 ${numberWithCommas(man)}만원`;
+            } else {
+                return `${numberWithCommas(num)}만원`;
+            }
+        }
+
+        // 괄호 안의 문자열을 분리하는 함수
+        function extractTextInBrackets(str) {
+            const match = str.match(/\(([^()]|[(][^()]*[)])*\)/);
+            return match ? match[0].slice(1, -1) : null;
+        }
+
+        $(document).ready(function () {
+            var lastClicked = null;  // 마지막으로 클릭한 버튼을 저장하는 변수
+
+            $(".gradient-box").click(function () {
+                // 같은 버튼을 누른 경우
+                if (lastClicked === $(this).data("region")) {
+                    $(".gradient-box").removeClass("flex-item-expand flex-item-hidden").addClass("flex-item");
+                    $("tbody").fadeOut(250, function () {
+                        $(this).empty().show();
+                    });
+                    lastClicked = null;
+                    return;
+                }
+
+                // 새로운 버튼을 누른 경우
+                lastClicked = $(this).data("region");
+
+                $(".gradient-box").addClass("flex-item-hidden");
+                $(this).removeClass("flex-item flex-item-hidden").addClass("flex-item-expand");
+
+                $.ajax({
+                    url: "/get_data",
+                    type: "get",
+                    data: {
+                        region: lastClicked
+                    },
+                    success: function (response) {
+                        $("tbody").fadeOut(500, function () {
+                            $("tbody").empty();
+                            response.forEach(function (row) {
+                                var Ratio = parseFloat(row['전세가율']) >= 70 ? `<td style='color:var(--alert-color);'><b>${row['전세가율']}%</b></td>` : `<td>${row['전세가율']}%</td>`;
+                                $("tbody").append(`
+                                <tr>
+                                    <td>${row['소재지']}</td>
+                                    <td>${numberWithCommas(row['최소 전세가'])} ~ ${numberWithCommas(row['최대 전세가'])}</td>
+                                    <td>${numberWithCommas(row['최소 매매가'])} ~ ${numberWithCommas(row['최대 매매가'])}</td>
+                                    ${Ratio}
+                                </tr>`);
+                            });
+                            $(this).fadeIn(500);
+                        });
+                    }
+                });
+            });
+            $("body").on("click", "tbody tr", function () {
+                var rowData = $(this).children("td").map(function () {
+                    return $(this).text();
+                }).get();
+
+                $.ajax({
+                    url: "/get_detail",
+                    type: "GET",
+                    data: { detail: rowData[0] },
+                    success: function (response) {
+                        $('#dataModalLabel').text(extractTextInBrackets(rowData[0]));
+                        $('#address').text(response[0]['주소']);
+                        $('#area').text(response[0]['면적'] + "㎡");
+                        $('#price').text(formatPrice(response[0]['평균 매매가']));
+                        $('#jeonse').text(formatPrice(response[0]['평균 전세가']));
+                        $('#type').text(response[0]['건물용도']);
+                        $('#year').text(response[0]['건축년도'] + "년");
+                        $('#ratio').text(response[0]['전세가율'] + "%");
+
+                        // Chart 초기화
+                        if (chart) {
+                            chart.destroy();
+                        }
+
+                        const ctx = document.getElementById('detailChart').getContext('2d');
+
+                        const labels = response.map(row => row['계약월']);
+                        const jeonse_prices = response.map(row => row['전세가']);
+                        const maemae_prices = response.map(row => row['매매가']);
+
+                        chart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: '전세가',
+                                        data: jeonse_prices,
+                                        borderColor: '#007bff',
+                                        pointRadius: 0
+                                    },
+                                    {
+                                        label: '매매가',
+                                        data: maemae_prices,
+                                        borderColor: '#28a745',
+                                        pointRadius: 0
+                                    }
+                                ]
+                            }
+                        });
+
+                        $('#dataModal').modal('show');
+                    }
+                });
+
+                // 모달이 닫힐 때 차트 초기화
+                $('#dataModal').on('hidden.bs.modal', function () {
+                    if (chart) {
+                        chart.destroy();
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <nav class="navbar navbar-light border-bottom shadow-sm py-3">
+        <div class="container-fluid justify-content-center">
+            <a id="logo" class="display-5" href="#">
+                <span class="text-main">깡통전세</span>
+                <img src="static/image/logo.png" alt="Logo" style="height: 48px; width: auto;">
+                단속반
+            </a>
+        </div>
+    </nav>
+    <main>
+        <div class="container">
+            <div class="banner my-5"></div>
+            <hr />
+            <div class="flex-container my-3">
+                <div class="flex-title text-center">
+                    <h1 class="fw-bold mb-4">
+                        서울시 <span class="text-main">평균 전세가율 70% 이상</span> <span class="dotted">깡통전세</span> 리스트
+                    </h1>
+                </div>
+                {% for item in summary %}
+                <div class="flex-item container justify-content-center gradient-box" data-region="{{ item['Region'] }}">
+                    <h4 class="col text-center fw-bold">
+                        {{ item['Region'] }}
+                    </h4>
+                    <div class="col text-center text-main">
+                        {{ item['Filtered'] }} / {{ item['Total'] }}
+                    </div>
+                    <div class="col text-center small-text">
+                        ({{ item['Ratio'] }}%)
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>소재지</th>
+                        <th>전세가(만원)</th>
+                        <th>매매가(만원)</th>
+                        <th>전세가율</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="dataModal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="dataModalLabel">세부 정보</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="top-info">
+                            <div class="info-title">2022년 평균 전세가율</div>
+                            <div id="ratio" class="info-content"></div>
+                            <div class="info-title">총 면적</div>
+                            <div id="area" class="info-content"></div>
+                        </div>
+                        <div class="middle-info">
+                            <div class="info-title">평균 매매가</div>
+                            <div id="price" class="info-content">1억7,500만</div>
+                            <div class="info-title">평균 전세가</div>
+                            <div id="jeonse" class="info-content">2억</div>
+                            <div class="note">※ 매매가/전세가는 평균 금액으로 실제 가격과 차이가 있을 수 있습니다.</div>
+                        </div>
+                        <div class="other-info">
+                            <div class="info-title">건물 유형</div>
+                            <div id="type" class="info-content"></div>
+                            <div class="info-title">주소</div>
+                            <div id="address" class="info-content"></div>
+                            <div class="info-title">건축연도</div>
+                            <div id="year" class="info-content"></div>
+                        </div>
+                        <div class="chart-section">
+                            <canvas id="detailChart" width="800" height="400"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="footer">
+        <p>2023 TP2 깡통전세 단속반</p>
+    </footer>
+</body>
+
+</html>
